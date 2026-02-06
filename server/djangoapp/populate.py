@@ -1,9 +1,7 @@
 from .models import CarMake, CarModel
 
 def initiate():
-    # Limpia para que puedas ejecutar initiate() más de una vez sin duplicados
-    CarModel.objects.all().delete()
-    CarMake.objects.all().delete()
+    default_dealer_ids = [1, 4, 8, 14, 21]  
 
     car_make_data = [
         {"name": "NISSAN", "description": "Great cars. Japanese technology"},
@@ -15,44 +13,41 @@ def initiate():
 
     car_make_instances = []
     for data in car_make_data:
-        car_make_instances.append(
-            CarMake.objects.create(
-                name=data["name"],
-                description=data["description"]
-            )
+        make, _ = CarMake.objects.get_or_create(
+            name=data["name"],
+            defaults={"description": data["description"]}
         )
+        car_make_instances.append(make)
 
-    # Create CarModel instances with the corresponding CarMake instances
-    # IMPORTANTE: incluir dealer_id (NOT NULL en tu modelo)
     car_model_data = [
-        {"name": "Pathfinder", "type": "SUV",   "year": 2023, "dealer_id": 1, "car_make": car_make_instances[0]},
-        {"name": "Qashqai",     "type": "SUV",   "year": 2023, "dealer_id": 1, "car_make": car_make_instances[0]},
-        {"name": "XTRAIL",      "type": "SUV",   "year": 2023, "dealer_id": 1, "car_make": car_make_instances[0]},
+        {"name": "Pathfinder", "type": "SUV", "year": 2023, "car_make": car_make_instances[0], "dealer_id": default_dealer_ids[0]},
+        {"name": "Qashqai", "type": "SUV", "year": 2023, "car_make": car_make_instances[0], "dealer_id": default_dealer_ids[1]},
+        {"name": "XTRAIL", "type": "SUV", "year": 2023, "car_make": car_make_instances[0], "dealer_id": default_dealer_ids[2]},
 
-        {"name": "A-Class",     "type": "SUV",   "year": 2023, "dealer_id": 2, "car_make": car_make_instances[1]},
-        {"name": "C-Class",     "type": "SUV",   "year": 2023, "dealer_id": 2, "car_make": car_make_instances[1]},
-        {"name": "E-Class",     "type": "SUV",   "year": 2023, "dealer_id": 2, "car_make": car_make_instances[1]},
+        {"name": "A-Class", "type": "SUV", "year": 2023, "car_make": car_make_instances[1], "dealer_id": default_dealer_ids[3]},
+        {"name": "C-Class", "type": "SUV", "year": 2023, "car_make": car_make_instances[1], "dealer_id": default_dealer_ids[4]},
+        {"name": "E-Class", "type": "SUV", "year": 2023, "car_make": car_make_instances[1], "dealer_id": default_dealer_ids[0]},
 
-        {"name": "A4",          "type": "SUV",   "year": 2023, "dealer_id": 3, "car_make": car_make_instances[2]},
-        {"name": "A5",          "type": "SUV",   "year": 2023, "dealer_id": 3, "car_make": car_make_instances[2]},
-        {"name": "A6",          "type": "SUV",   "year": 2023, "dealer_id": 3, "car_make": car_make_instances[2]},
+        {"name": "A4", "type": "SUV", "year": 2023, "car_make": car_make_instances[2], "dealer_id": default_dealer_ids[1]},
+        {"name": "A5", "type": "SUV", "year": 2023, "car_make": car_make_instances[2], "dealer_id": default_dealer_ids[2]},
+        {"name": "A6", "type": "SUV", "year": 2023, "car_make": car_make_instances[2], "dealer_id": default_dealer_ids[3]},
 
-        {"name": "Sorrento",    "type": "SUV",   "year": 2023, "dealer_id": 4, "car_make": car_make_instances[3]},
-        {"name": "Carnival",    "type": "SUV",   "year": 2023, "dealer_id": 4, "car_make": car_make_instances[3]},
-        # OJO: si tu choices usa 'SEDAN' como valor, cambia "Sedan" por "SEDAN"
-        {"name": "Cerato",      "type": "SEDAN", "year": 2023, "dealer_id": 4, "car_make": car_make_instances[3]},
+        {"name": "Sorrento", "type": "SUV", "year": 2023, "car_make": car_make_instances[3], "dealer_id": default_dealer_ids[4]},
+        {"name": "Carnival", "type": "SUV", "year": 2023, "car_make": car_make_instances[3], "dealer_id": default_dealer_ids[0]},
+        {"name": "Cerato", "type": "Sedan", "year": 2023, "car_make": car_make_instances[3], "dealer_id": default_dealer_ids[1]},
 
-        {"name": "Corolla",     "type": "SEDAN", "year": 2023, "dealer_id": 5, "car_make": car_make_instances[4]},
-        {"name": "Camry",       "type": "SEDAN", "year": 2023, "dealer_id": 5, "car_make": car_make_instances[4]},
-        {"name": "Kluger",      "type": "SUV",   "year": 2023, "dealer_id": 5, "car_make": car_make_instances[4]},
-        # Add more CarModel instances as needed
+        {"name": "Corolla", "type": "Sedan", "year": 2023, "car_make": car_make_instances[4], "dealer_id": default_dealer_ids[2]},
+        {"name": "Camry", "type": "Sedan", "year": 2023, "car_make": car_make_instances[4], "dealer_id": default_dealer_ids[3]},
+        {"name": "Kluger", "type": "SUV", "year": 2023, "car_make": car_make_instances[4], "dealer_id": default_dealer_ids[4]},
     ]
 
     for data in car_model_data:
-        CarModel.objects.create(
+        CarModel.objects.get_or_create(
             name=data["name"],
             car_make=data["car_make"],
-            type=data["type"],
-            year=data["year"],
-            dealer_id=data["dealer_id"],
+            defaults={
+                "type": data["type"],
+                "year": data["year"],
+                "dealer_id": data["dealer_id"],
+            }
         )

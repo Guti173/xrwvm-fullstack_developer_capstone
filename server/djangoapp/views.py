@@ -92,17 +92,21 @@ def get_dealerships(request, state="All"):
     return JsonResponse({"status":200,"dealers":dealerships})
 
 def get_dealer_reviews(request, dealer_id):
-    # if dealer id has been provided
-    if(dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
-        reviews = get_request(endpoint)
+    if dealer_id:
+        endpoint = "/fetchReviews/dealer/" + str(dealer_id)
+        reviews = get_request(endpoint) or []
+
+        # Si falla el sentiment analyzer, no rompas el endpoint
         for review_detail in reviews:
-            response = analyze_review_sentiments(review_detail['review'])
-            print(response)
-            review_detail['sentiment'] = response['sentiment']
-        return JsonResponse({"status":200,"reviews":reviews})
+            try:
+                response = analyze_review_sentiments(review_detail.get('review', ''))
+                review_detail['sentiment'] = response.get('sentiment', 'neutral')
+            except Exception:
+                review_detail['sentiment'] = 'neutral'
+
+        return JsonResponse({"status": 200, "reviews": reviews})
     else:
-        return JsonResponse({"status":400,"message":"Bad Request"})
+        return JsonResponse({"status": 400, "message": "Bad Request"})
 
 def get_dealer_details(request, dealer_id):
     if(dealer_id):
@@ -124,12 +128,11 @@ def add_review(request):
         return JsonResponse({"status":403,"message":"Unauthorized"})
 
 def get_cars(request):
-    count = CarMake.objects.filter().count()
-    print(count)
-    if(count == 0):
+    if CarModel.objects.count() == 0:
         initiate()
-    car_models = CarModel.objects.select_related('car_make')
+
+    car_models = CarModel.objects.select_related('car_make').all()
     cars = []
     for car_model in car_models:
         cars.append({"CarModel": car_model.name, "CarMake": car_model.car_make.name})
-    return JsonResponse({"CarModels":cars})
+    return JsonResponse({"CarModels": cars})

@@ -24,32 +24,41 @@ const Dealer = () => {
   let reviews_url = root_url+`djangoapp/reviews/dealer/${id}`;
   let post_review = root_url+`postreview/${id}`;
   
-  const get_dealer = async ()=>{
-    const res = await fetch(dealer_url, {
-      method: "GET"
-    });
+  const get_dealer = async () => {
+    const res = await fetch(dealer_url, { method: "GET" });
     const retobj = await res.json();
-    
-    if(retobj.status === 200) {
-      let dealerobjs = Array.from(retobj.dealer)
-      setDealer(dealerobjs[0])
-    }
-  }
 
-  const get_reviews = async ()=>{
-    const res = await fetch(reviews_url, {
-      method: "GET"
-    });
-    const retobj = await res.json();
-    
-    if(retobj.status === 200) {
-      if(retobj.reviews.length > 0){
-        setReviews(retobj.reviews)
+    if (retobj.status === 200) {
+      // dealer viene como objeto, no como array
+      setDealer(retobj.dealer);
+    }
+  };
+
+  const get_reviews = async () => {
+    try {
+      const res = await fetch(reviews_url, { method: "GET" });
+  
+      // Si el backend devuelve HTML por error, esto puede fallar:
+      const retobj = await res.json();
+  
+      if (retobj.status == 200) { // == por si viene "200" como string
+        if (retobj.reviews && retobj.reviews.length > 0) {
+          setReviews(retobj.reviews);
+          setUnreviewed(false);
+        } else {
+          setReviews([]);
+          setUnreviewed(true);
+        }
       } else {
+        setReviews([]);
         setUnreviewed(true);
       }
+    } catch (e) {
+      console.error("Error loading reviews:", e);
+      setReviews([]);
+      setUnreviewed(true);
     }
-  }
+  };
 
   const senti_icon = (sentiment)=>{
     let icon = sentiment === "positive"?positive_icon:sentiment==="negative"?negative_icon:neutral_icon;
