@@ -1,0 +1,8 @@
+services:
+  django:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      backend_url: "http://host.docker.internal:3030"
+      sentiment_analyzer_url: "http://host.docker.internal:5050/"
